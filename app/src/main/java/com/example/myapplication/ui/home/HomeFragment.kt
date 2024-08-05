@@ -212,9 +212,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateStopSpinner(relevantTrips: List<Trip>) {
+        Toast.makeText(context, "Updating available stops for this route..", Toast.LENGTH_LONG).show()
+
         val errorHandler = CoroutineExceptionHandler { _, exception ->
             Log.e(TAG, "Error updating stop spinner", exception)
+            Toast.makeText(context, "Error updating stop spinner", Toast.LENGTH_SHORT).show()
         }
+
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO + errorHandler) {
             val relevantStopIds = stopTimes.filter { it.tripId in relevantTrips.map { it.tripId } }.map { it.stopId }.distinct()
@@ -224,8 +228,11 @@ class HomeFragment : Fragment() {
                 val stopAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, filteredStops.map { it.stopName })
                 stopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 binding.spinnerStop.adapter = stopAdapter
+                Toast.makeText(context, "Updated.", Toast.LENGTH_SHORT).show()
+
             }
         }
+
     }
 
 
