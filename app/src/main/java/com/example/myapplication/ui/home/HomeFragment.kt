@@ -272,6 +272,8 @@ class HomeFragment : Fragment() {
                 time = ""
             )
             savedStops.add(newStop)
+            Toast.makeText(context, "L'arrêt $selectedStop à été ajouté.", Toast.LENGTH_SHORT).show()
+
 
             // Convert the list back to JSON
             val newSavedStopsJson = Gson().toJson(savedStops)

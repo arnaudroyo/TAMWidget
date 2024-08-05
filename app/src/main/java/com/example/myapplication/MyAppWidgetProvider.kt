@@ -36,7 +36,7 @@ class MyAppWidgetProvider : AppWidgetProvider() {
         private const val ACTION_REFRESH = "com.example.myapplication.ACTION_REFRESH"
         private var isFetchingData = false
 
-        fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+        fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, currentDateTime: String? = null) {
             Log.d(TAG, "updateAppWidget called for widget ID $appWidgetId")
             val intent = Intent(context, WidgetService::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -45,6 +45,9 @@ class MyAppWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.widget_layout).apply {
                 setRemoteAdapter(R.id.widget_list_view, intent)
                 setEmptyView(R.id.widget_list_view, R.id.empty_view)
+
+                val dateTimeText = currentDateTime ?: java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+                setTextViewText(R.id.widget_last_update, "Dernière MAJ : $dateTimeText")
 
                 val refreshIntent = Intent(context, MyAppWidgetProvider::class.java).apply {
                     action = ACTION_REFRESH
@@ -59,6 +62,11 @@ class MyAppWidgetProvider : AppWidgetProvider() {
 
                 val pendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, flags)
                 setOnClickPendingIntent(R.id.refresh_button, pendingIntent)
+
+                // Intent to launch the main activity when the widget is clicked
+                val launchAppIntent = Intent(context, MainActivity::class.java)
+                val launchAppPendingIntent = PendingIntent.getActivity(context, 0, launchAppIntent, flags)
+                setOnClickPendingIntent(R.id.widget_layout, launchAppPendingIntent)
             }
 
             Log.d(TAG, "Updating widget views for widget ID $appWidgetId")
@@ -100,6 +108,10 @@ class MyAppWidgetProvider : AppWidgetProvider() {
                             logLargeList("CalendarDates", calendarDates)
 
                             saveRealTimeData(context, appWidgetId, trips, stops, stopTimes, calendars, calendarDates)
+
+                            val currentDateTime = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+                            updateAppWidget(context, appWidgetManager, appWidgetId, currentDateTime)
+
                             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_list_view)
                         }
                     } else {
